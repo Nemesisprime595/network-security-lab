@@ -1,0 +1,36 @@
+enable
+configure terminal
+hostname R1
+no ip domain-lookup
+enable secret REPLACE_ENABLE_SECRET
+username labadmin privilege 15 secret REPLACE_ADMIN_SECRET
+ip domain-name lab.example
+access-list 10 permit host 192.168.10.10
+line vty 0 4
+ login local
+ transport input ssh
+ access-class 10 in
+ exec-timeout 5 0
+exit
+ip access-list extended GUEST-IN
+ permit icmp 192.168.20.0 0.0.0.255 host 192.168.20.1 echo
+ deny ip any any
+exit
+interface GigabitEthernet0/0
+ no ip address
+ no shutdown
+exit
+interface GigabitEthernet0/0.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+exit
+interface GigabitEthernet0/0.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+ ip access-group GUEST-IN in
+exit
+interface GigabitEthernet0/0.30
+ encapsulation dot1Q 30
+ ip address 192.168.30.1 255.255.255.0
+exit
+end
